@@ -11,21 +11,32 @@ except ImportError:
 #*************************************************************************#
 
 class parseConfig():
-    __key = 19
-    __configfile = None
-    _userInfo = dict()
 
     def __init__(self,configfile):
+        self.__key = 19
+        self.__configfile = None
+        self._userInfo = dict()
         self.__configfile = configfile
 
     def getUserPasswd(self,user):
         cfstream = open(self.__configfile,'r')
         self._userInfo= yaml.load(cfstream)
-        return  self.__show(self._userInfo[user])
+        cfstream.close()
+        #print(self.__show(self._userInfo[user].encode('utf-8')))
+        return  self.__show(self._userInfo[user].encode('utf-8'))
 
     def overWriteConfig(self):
-        with os.open(self.__configfile, 'w+') as outfile:
-            yaml.dump(self._userInfo, outfile, default_flow_style=False)
+            outfile=open(self.__configfile, 'wb+') 
+            try:
+                #yaml.dump(self._userInfo, outfile, default_flow_style=False,allow_unicode = True, encoding = 'utf-8')
+                yaml.dump(self._userInfo, outfile, default_flow_style=False)
+            except Exception:
+                print("file write error")
+                outfile.close()
+                return False
+
+            outfile.close()
+            return True
 
     def encrypt(self,s): 
         b = bytearray(str(s).encode("gbk")) 

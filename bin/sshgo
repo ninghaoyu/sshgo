@@ -2,14 +2,22 @@
 # -*- coding: UTF-8 -*-
 
 import signal,argparse,os,getpass
-from Vulcan import parseConfig,AutoSSH,Message
+try:
+    from Vulcan import parseConfig,AutoSSH,Message
+except ImportError:
+    print("Vulcan lib in not find")
+    pass
 
-def mkUsersCfg(user):
-    global configfile    
-    config = parseConfig(configfile)
+
+
+
+def mkUsersCfg(user,configfile):
+    config=parseConfig(configfile)
     password = getpass.getpass('Type your ssh password:')
-    config._userInfo[user] = config.encrypt(password)
-    config.overWriteConfig()
+    config._userInfo[user] = config.encrypt(password).encode('utf-8')
+    #print(config._userInfo[user])
+    #os._exit(0)
+    return config.overWriteConfig()
 
 
 def main():
@@ -23,24 +31,42 @@ def main():
             required=False,
             default=getpass.getuser(),
             help   ='assign ssh login user,default is local current login user' )
-    parser.add_argument('remoteHost',
+    parser.add_argument('loginInfo',
             action="store",
+            nargs='*',
             help  ='assign will auto ssh login remote hostname or IP address')
-    parser.add_argument('sudoUser',
-            action  ="store",
-            nargs   ='?',
-            default = None,
-            help='remote sudo user,default is root' )
+    #parser.add_argument('sudoUser',
+    #        action  ="store",
+    #        nargs   ='?',
+    #        default = None,
+    #        help='remote sudo user,default is root' )
 
     args = parser.parse_args()
     #args.func(args)
-
     #print(args)
     #os._exit(0)
 
     configfile = '/home/%s/.go.yml' % getpass.getuser()
+    exitCode=0
+
+    if args.loginInfo[0] == 'mkconfig':
+        if  mkUsersCfg(args.sshUser,configfile):
+            print(msg.OkGreen('make config %s SUCCESS!' % configfile) )
+        else:
+            print(msg.Failed('make config %s Failed' % configfile))
+            exitCode=1
+
+        os._exit(exitCode)
+    elif args.loginInfo[0] != 'mkconfig' and len(args.loginInfo) == 1: 
+        remoteHost = args.loginInfo[0]
+        sudoUser   = None
+    else:
+        remoteHost = args.loginInfo[0]
+        sudoUser   = args.loginInfo[1]
+        
+
     try:
-        ssh = AutoSSH(args.remoteHost,args.sshUser,configfile,args.sudoUser)
+        ssh = AutoSSH(remoteHost,args.sshUser,configfile,sudoUser)
         signal.signal(signal.SIGWINCH,ssh._resizeWin)
         ssh.sshInteract()
 

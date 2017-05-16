@@ -29,11 +29,9 @@ with open('requirements.txt') as requirements_file:
 
 pkgs = find_packages('lib',exclude=['tests'])
 
-print(pkgs)
+#print(pkgs)
 
-os._exit(0)
-
-
+#os._exit(0)
 
 setup(
     name='sshgo',
