@@ -26,17 +26,23 @@ with open('requirements.txt') as requirements_file:
                 "That indicates this copy of the source code is incomplete.")
         sys.exit(2)
 
+with open('VERSION') as version_file:
+    __version__ = version_file.read().splitlines()[0]
+    #print(__version__)
+    if not __version__:
+        print("Unable to read version from the VERSION file"
+                "That indicates this copy of the source code is incomplete.")
+        sys.exit(2)
 
-pkgs = find_packages('lib',exclude=['tests'])
 
-#print(pkgs)
 
-#os._exit(0)
+#pkgs = find_packages('lib',exclude=['tests'])
+
 
 setup(
     name='sshgo',
     ext_modules=[Extension('Vulcan', cythonize("lib/Vulcan.py")[0].sources )],
-    version='0.1',
+    version=__verion__,
     url='https://github.com/ninghaoyu/sshgo',
     license='MIT',
     author='NingHaoYu',
