@@ -1,4 +1,3 @@
-# sshgo
-python练手项目
 
-1. 利用python expect自动免密码登陆远程服务器
+python 免密码登录远程linux服务器
+

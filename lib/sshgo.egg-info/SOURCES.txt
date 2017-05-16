@@ -1,0 +1,9 @@
+setup.py
+bin/sshgo
+lib/Vulcan.c
+lib/sshgo.egg-info/PKG-INFO
+lib/sshgo.egg-info/SOURCES.txt
+lib/sshgo.egg-info/dependency_links.txt
+lib/sshgo.egg-info/not-zip-safe
+lib/sshgo.egg-info/requires.txt
+lib/sshgo.egg-info/top_level.txt

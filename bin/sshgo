@@ -1,0 +1,58 @@
+#!/usr/bin/env python2
+# -*- coding: UTF-8 -*-
+
+import signal,argparse,os,getpass
+from Vulcan import parseConfig,AutoSSH,Message
+
+def mkUsersCfg(user):
+    global configfile    
+    config = parseConfig(configfile)
+    password = getpass.getpass('Type your ssh password:')
+    config._userInfo[user] = config.encrypt(password)
+    config.overWriteConfig()
+
+
+def main():
+    msg = Message()
+    signal.signal(signal.SIGINT,lambda sig,data: os._exit(1))
+
+    parser = argparse.ArgumentParser(prog='sshgo',description="Auto ssh remote host and don't type your password! ^_^ ")
+    parser.add_argument('-u','--user',
+            action ="store",
+            dest   ="sshUser",
+            required=False,
+            default=getpass.getuser(),
+            help   ='assign ssh login user,default is local current login user' )
+    parser.add_argument('remoteHost',
+            action="store",
+            help  ='assign will auto ssh login remote hostname or IP address')
+    parser.add_argument('sudoUser',
+            action  ="store",
+            nargs   ='?',
+            default = None,
+            help='remote sudo user,default is root' )
+
+    args = parser.parse_args()
+    #args.func(args)
+
+    #print(args)
+    #os._exit(0)
+
+    configfile = '/home/%s/.go.yml' % getpass.getuser()
+    try:
+        ssh = AutoSSH(args.remoteHost,args.sshUser,configfile,args.sudoUser)
+        signal.signal(signal.SIGWINCH,ssh._resizeWin)
+        ssh.sshInteract()
+
+    except Exception as e:
+        print(msg.Failed("ssh failed on login."))
+        print(e)
+
+
+"""
+-----------------------------------------------------
+"""
+
+
+if __name__ == '__main__' :
+    main()
