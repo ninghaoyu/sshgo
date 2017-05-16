@@ -44,7 +44,7 @@ def main():
     #print(args)
     #os._exit(0)
 
-    configfile = '/home/%s/.go.yml' % getpass.getuser()
+    configfile = '/home/%s/.go.yml' % args.sshUser
     exitCode=0
 
     if args.loginInfo[0] == 'mkconfig':
