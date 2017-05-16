@@ -5,10 +5,8 @@ import signal,argparse,os,getpass
 try:
     from Vulcan import parseConfig,AutoSSH,Message
 except ImportError:
-    print("Vulcan lib in not find")
-    pass
-
-
+    print("Vulcan lib is not find")
+    os._exit(1)
 
 
 def mkUsersCfg(user,configfile):
