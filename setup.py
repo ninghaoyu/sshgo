@@ -42,7 +42,7 @@ with open('VERSION') as version_file:
 setup(
     name='sshgo',
     ext_modules=[Extension('Vulcan', cythonize("lib/Vulcan.py")[0].sources )],
-    version=__verion__,
+    version=__version__,
     url='https://github.com/ninghaoyu/sshgo',
     license='MIT',
     author='NingHaoYu',
