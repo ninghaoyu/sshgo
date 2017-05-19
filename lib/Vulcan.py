@@ -22,8 +22,10 @@ class parseConfig():
         cfstream = open(self.__configfile,'r')
         self._userInfo= yaml.load(cfstream)
         cfstream.close()
-        #print(self.__show(self._userInfo[user].encode('utf-8')))
-        return  self.__show(self._userInfo[user].encode('utf-8'))
+        #print('I am here',self.__show(self._userInfo[user].encode('utf-8')))
+        #print('I am here',self.__show(self._userInfo[user]))
+        #return  self.__show(self._userInfo[user].encode('utf-8'))
+        return  self.__show(self._userInfo[user])
 
     def overWriteConfig(self):
             outfile=open(self.__configfile, 'wb+') 
@@ -123,14 +125,12 @@ class AutoSSH():
     __sshpassword = None
     _sshobj = None
     __sudoprompt = '::::'
-    __userprompt = re.compile('.*[\$>%#] $')
-    __passwdprompt = re.compile('assword: *$')
+    __userprompt = re.compile(str.encode('.*[\$>%#] $'))
+    __passwdprompt = re.compile(str.encode('assword: *$'))
     __SSH = None
     _msg = Message()
 
     def __init__(self,hostname,sshuser,configfile,suUser=None):
-
-
 
         self.__hostname= hostname
 
@@ -138,7 +138,7 @@ class AutoSSH():
             raise Exception(self._msg.Warning('The hostname "%s" is not resolve!!!' % self.__hostname))
 
         self.__sshpassword = parseConfig(configfile).getUserPasswd(sshuser)
-        #print(self.__sshpassword)
+        #print("----->",self.__sshpassword)
         if self.__sshpassword == None:
             raise Exception(self._msg.Failed('The file %s is not find or config was error!' % configfile))
 
@@ -188,7 +188,7 @@ class AutoSSH():
             self._sshobj.expect([self.__passwdprompt])
             self._sshobj.sendline(self.__sshpassword)
             #print(self._sshobj.before.decode("utf-8"))
-            print(self._sshobj.before)
+            print(self._sshobj.before.decode())
             login =  self._sshobj.expect([self.__userprompt,self.__passwdprompt,self.__sudoprompt,pexpect.EOF,pexpect.TIMEOUT])
             if login == 0:
                 pass
