@@ -29,15 +29,16 @@ def main():
             required=False,
             default=getpass.getuser(),
             help   ='assign ssh login user,default is local current login user' )
+    parser.add_argument('-p','--port',
+            action ="store",
+            dest   ="sshPort",
+            required=False,
+            default =22,
+            help   ='ssh port,default is 22' )
     parser.add_argument('loginInfo',
             action="store",
             nargs='*',
             help  ='assign will auto ssh login remote hostname or IP address')
-    #parser.add_argument('sudoUser',
-    #        action  ="store",
-    #        nargs   ='?',
-    #        default = None,
-    #        help='remote sudo user,default is root' )
 
     args = parser.parse_args()
     #args.func(args)
@@ -47,6 +48,9 @@ def main():
     configfile = '/home/%s/.go.yml' % args.sshUser
     exitCode=0
 
+    """
+    no args then print help info
+    """
     if len(args.loginInfo) == 0:
         parser.print_help()
         os._exit(0)
@@ -69,7 +73,7 @@ def main():
         
 
     try:
-        ssh = AutoSSH(remoteHost,args.sshUser,configfile,sudoUser)
+        ssh = AutoSSH(remoteHost,args.sshUser,configfile,args.sshPort,sudoUser)
         signal.signal(signal.SIGWINCH,ssh._resizeWin)
         ssh.sshInteract()
 
