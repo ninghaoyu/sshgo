@@ -127,9 +127,11 @@ class AutoSSH():
         self.__hostname= hostname
         self.__sshport=sshport
         self.__nosshport = re.compile(str.encode('.*port %s: Connection refused.*' % self.__sshport))
+        self.__sshtimeout = re.compile(str.encode('.*port %s: Connection timed out.*' % self.__sshport))
         self.__sudoprompt = '::::'
         self.__userprompt = re.compile(str.encode('.*[\$>%#] $'))
         self.__passwdprompt = re.compile(str.encode('assword: *$'))
+        self.__sshoptions = ' -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
         self._msg = Message()
 
 
@@ -142,7 +144,8 @@ class AutoSSH():
         if self.__sshpassword == None:
             raise Exception(self._msg.Failed('The file %s is not find or config was error!' % configfile))
 
-        self.__SSH = 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p %s -t -l %s %s' % (self.__sshport,sshuser,hostname)
+        #self.__SSH = 'ssh -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p %s -t -l %s %s' % (self.__sshport,sshuser,hostname)
+        self.__SSH = 'ssh'+ self.__sshoptions + ' -p %s -t -l %s %s' % (self.__sshport,sshuser,hostname)
         if suUser != None:
             self.__SSH += " sudo -p '%s' su %s" % (self.__sudoprompt,suUser)
 
@@ -185,10 +188,12 @@ class AutoSSH():
             self._sshobj = pexpect.spawn(self.__SSH)
             self.__setWinSize()
             #self._sshobj.expect([self.__passwdprompt])
-            sshspawnstatus = self._sshobj.expect([self.__nosshport,self.__passwdprompt])
+            sshspawnstatus = self._sshobj.expect([self.__sshtimeout,self.__nosshport,self.__passwdprompt])
             if sshspawnstatus == 0:
-                raise Exception(self._msg.Failed("no SSH port %s opened !" % self.__sshport))
+                raise Exception(self._msg.Failed("ssh port %s time out!" % self.__sshport))
             elif sshspawnstatus == 1:
+                raise Exception(self._msg.Failed("no SSH port %s opened !" % self.__sshport))
+            elif sshspawnstatus == 2:
                 self._sshobj.sendline(self.__sshpassword)
 
             #print(self._sshobj.before.decode("utf-8"))
