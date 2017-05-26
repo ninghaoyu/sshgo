@@ -125,6 +125,7 @@ class AutoSSH():
     def __init__(self,hostname,sshuser,configfile,sshport,suUser=None):
 
         self.__hostname= hostname
+        self.__sshbin = '/usr/bin/ssh'
         self.__sshport=sshport
         self.__nosshport = re.compile(str.encode('.*port %s: Connection refused.*' % self.__sshport))
         self.__sshtimeout = re.compile(str.encode('.*port %s: Connection timed out.*' % self.__sshport))
@@ -145,7 +146,7 @@ class AutoSSH():
             raise Exception(self._msg.Failed('The file %s is not find or config was error!' % configfile))
 
         #self.__SSH = 'ssh -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p %s -t -l %s %s' % (self.__sshport,sshuser,hostname)
-        self.__SSH = 'ssh'+ self.__sshoptions + ' -p %s -t -l %s %s' % (self.__sshport,sshuser,hostname)
+        self.__SSH = self.__sshbin + self.__sshoptions + ' -p %s -t -l %s %s' % (self.__sshport,sshuser,hostname)
         if suUser != None:
             self.__SSH += " sudo -p '%s' su %s" % (self.__sudoprompt,suUser)
 
