@@ -55,6 +55,6 @@ setup(
     data_files=[],
     long_description=open('README.md').read(),
     zip_safe=False,
-    setup_requires=[],
+    setup_requires=['cython'],
     test_suite=''
 )
