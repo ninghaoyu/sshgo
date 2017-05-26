@@ -4,6 +4,7 @@
 #
 # useful targets:
 #   make sdist ---------------- produce a tarball
+#   make whl   ---------------- produce a whl package
 #   make srpm ----------------- produce a SRPM
 #   make rpm  ----------------- produce RPMs
 #   make deb-src -------------- produce a DEB source
@@ -31,7 +32,7 @@ else
 ASCII2MAN = @echo "ERROR: AsciiDoc 'a2x' command is not installed but is required to build $(MANPAGES)" && exit 1
 endif
 
-PYTHON=python
+PYTHON=python3
 SITELIB = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 
 # VERSION file provides one place to update the software version
