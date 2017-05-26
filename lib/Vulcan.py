@@ -127,6 +127,7 @@ class AutoSSH():
     __sudoprompt = '::::'
     __userprompt = re.compile(str.encode('.*[\$>%#] $'))
     __passwdprompt = re.compile(str.encode('assword: *$'))
+    __nosshport = re.compile(str.encode('.*port 22: Connection refused.*'))
     __SSH = None
     _msg = Message()
 
@@ -184,9 +185,13 @@ class AutoSSH():
 
             self._sshobj = pexpect.spawn(self.__SSH)
             self.__setWinSize()
+            #self._sshobj.expect([self.__passwdprompt])
+            sshspawnstatus = self._sshobj.expect([self.__nosshport,self.__passwdprompt])
+            if sshspawnstatus == 0:
+                raise Exception(self._msg.Failed("no SSH port 22 opened !"))
+            elif sshspawnstatus == 1:
+                self._sshobj.sendline(self.__sshpassword)
 
-            self._sshobj.expect([self.__passwdprompt])
-            self._sshobj.sendline(self.__sshpassword)
             #print(self._sshobj.before.decode("utf-8"))
             print(self._sshobj.before.decode())
             login =  self._sshobj.expect([self.__userprompt,self.__passwdprompt,self.__sudoprompt,pexpect.EOF,pexpect.TIMEOUT])
