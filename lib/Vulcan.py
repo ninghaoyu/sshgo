@@ -230,7 +230,7 @@ class AutoSSH():
                 self._sshobj.sendline(self.__sshpassword)
 
             #print(self._sshobj.before.decode("utf-8"))
-            print(self._sshobj.before.decode())
+            print(self._sshobj.before.decode()+self._sshobj.after.decode())
 
             ''' when logined target host,if use sudo user to do soming
             '''
@@ -246,7 +246,7 @@ class AutoSSH():
                     raise Exception(self._msg.Failed("sudo Failed"))
             elif login == 3 :
                 #print(self._sshobj.before.decode("utf-8"))
-                print(self._sshobj.before)
+                print(self._sshobj.before+self._sshobj.after)
 
         except Exception as e:
             print(self._msg.Failed("ssh failed on login."))

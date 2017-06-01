@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import signal,argparse,os,getpass
+import platform
 try:
     from Vulcan import parseConfig,AutoSSH,Message
 except ImportError:
@@ -57,7 +58,13 @@ def main():
     #print(args)
     #os._exit(0)
 
-    configfile = '/home/%s/.go.yml' % args.sshUser
+    ostype = platform.system()
+
+    if ostype == 'Linux' or ostype == 'Darwin' or ostype == 'SunOS':
+        configfile = '/home/%s/.go.yml' % args.sshUser
+    elif ostype == 'Windows':
+        configfile = 'C:\go.yml' % args.sshUser
+
     exitCode=0
 
     """
