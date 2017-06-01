@@ -35,6 +35,18 @@ def main():
             required=False,
             default =22,
             help   ='ssh port,default is 22' )
+    parser.add_argument('-J','--jumphost',
+            action ="store",
+            dest   ="jumphost",
+            required=False,
+            default =None,
+            help   ='ssh jumphost ' )
+    parser.add_argument('-P','--jumpsshport',
+            action ="store",
+            dest   ="jumphostsshport",
+            required=False,
+            default =22,
+            help   ='ssh jumphost port default 22 ' )
     parser.add_argument('loginInfo',
             action="store",
             nargs='*',
@@ -73,7 +85,7 @@ def main():
         
 
     try:
-        ssh = AutoSSH(remoteHost,args.sshUser,configfile,args.sshPort,sudoUser)
+        ssh = AutoSSH(remoteHost,args.sshUser,configfile,args.sshPort,sudoUser,args.jumphost,args.jumphostsshport)
         signal.signal(signal.SIGWINCH,ssh._resizeWin)
         ssh.sshInteract()
 

@@ -122,9 +122,10 @@ class Message():
 #*************************************************************************#
 class AutoSSH():
 
-    def __init__(self,hostname,sshuser,configfile,sshport,suUser=None):
+    def __init__(self,hostname,sshuser,configfile,sshport,suUser=None,jumphost=None,jumphostsshport=22):
 
         self.__hostname= hostname
+        self.__sshjumphost = jumphost
         self.__sshbin = '/usr/bin/ssh'
         self.__sshport=sshport
         self.__nosshport = re.compile(str.encode('.*port %s: Connection refused.*' % self.__sshport))
@@ -132,14 +133,33 @@ class AutoSSH():
         self.__sudoprompt = '::::'
         self.__userprompt = re.compile(str.encode('.*[\$>%#] $'))
         self.__passwdprompt = re.compile(str.encode('assword: *$'))
-        self.__sshoptions = ' -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
+        if self.__sshjumphost == None:
+            self.__sshoptions = ' -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
+            self.__useJumpHost = False
+        else:
+            self.__sshoptions = ' -o ProxyCommand="' \
+                + self.__sshbin + ' -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p ' \
+                + self.__sshjumphost \
+                + ' -p %s " -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ' % jumphostsshport
+
+            self.__useJumpHost = True
+
         self._msg = Message()
 
+        '''
+        check ssh jump host reslove and target ssh host reslove
+        '''
+        if self.__useJumpHost :
+            if self.hostname_resolves(self.__sshjumphost) == False:
+                raise Exception(self._msg.Warning('The ssh jump hostname "%s" is not resolve!!!' % self.__sshjumphost))
 
-
-        if self.hostname_resolves() == False:
+        if self.hostname_resolves(self.__hostname) == False:
             raise Exception(self._msg.Warning('The hostname "%s" is not resolve!!!' % self.__hostname))
 
+
+        '''
+        parse config file get user password
+        '''
         self.__sshpassword = parseConfig(configfile).getUserPasswd(sshuser)
         #print("----->",self.__sshpassword)
         if self.__sshpassword == None:
@@ -161,13 +181,13 @@ class AutoSSH():
         #set remote expect terminal window size
         self._sshobj.setwinsize(rows, cols)
 
-    def hostname_resolves(self):
+    def hostname_resolves(self,hostname):
         isIP = re.compile('\d+.\d+.\d+.\d+')
-        if isIP.match(self.__hostname) == False:
+        if isIP.match(hostname) == False:
             return True
 
         try:
-            socket.gethostbyname(self.__hostname)
+            socket.gethostbyname(hostname)
             return True
         except socket.error:
             return False
@@ -188,7 +208,19 @@ class AutoSSH():
 
             self._sshobj = pexpect.spawn(self.__SSH)
             self.__setWinSize()
-            #self._sshobj.expect([self.__passwdprompt])
+            ''' when use ssh jump host to connect remote target host, login in jump host first
+            '''
+            if self.__useJumpHost:
+                spawnJumpHost = self._sshobj.expect([self.__sshtimeout,self.__nosshport,self.__passwdprompt])
+                if spawnJumpHost == 0:
+                    raise Exception(self._msg.Failed("jump ssh host port %s time out!" % self.__sshport))
+                elif spawnJumpHost == 1:
+                    raise Exception(self._msg.Failed("jump host no SSH port %s opened !" % self.__sshport))
+                elif spawnJumpHost == 2:
+                    self._sshobj.sendline(self.__sshpassword)
+
+            ''' ssh remote target host, login now
+            '''
             sshspawnstatus = self._sshobj.expect([self.__sshtimeout,self.__nosshport,self.__passwdprompt])
             if sshspawnstatus == 0:
                 raise Exception(self._msg.Failed("ssh port %s time out!" % self.__sshport))
@@ -199,12 +231,15 @@ class AutoSSH():
 
             #print(self._sshobj.before.decode("utf-8"))
             print(self._sshobj.before.decode())
+
+            ''' when logined target host,if use sudo user to do soming
+            '''
             login =  self._sshobj.expect([self.__userprompt,self.__passwdprompt,self.__sudoprompt,pexpect.EOF,pexpect.TIMEOUT])
-            if login == 0:
+            if login == 0: #not use sudo user
                 pass
-            elif login == 1 :
+            elif login == 1 : # no sudo
                 raise Exception(self._msg.Failed("Bad password"))
-            elif login == 2 :
+            elif login == 2 : #type sudo password
                 self._sshobj.sendline(self.__sshpassword)
                 j = self._sshobj.expect([self.__userprompt])
                 if j != 0:
