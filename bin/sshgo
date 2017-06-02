@@ -20,10 +20,21 @@ def mkUsersCfg(user,configfile):
 
 
 def main():
+
+
+    prg = os.path.basename(__file__)
+    if prg == 'sshgo':
+        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < HostName [sudouser] >'
+    elif prg == 'scpgo':
+        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < HostName:/path/srcfile HostName:/path/distfile >'
+
     msg = Message()
     signal.signal(signal.SIGINT,lambda sig,data: os._exit(1))
 
-    parser = argparse.ArgumentParser(prog='sshgo',description="Auto ssh remote host and don't type your password! ^_^ ")
+    parser = argparse.ArgumentParser(prog='sshgo',
+            usage= Usage,
+            description="Auto ssh remote host and don't type your password! ^_^ ")
+
     parser.add_argument('-u','--user',
             action ="store",
             dest   ="sshUser",
@@ -51,7 +62,7 @@ def main():
     parser.add_argument('loginInfo',
             action="store",
             nargs='*',
-            help  ='assign will auto ssh login remote hostname or IP address')
+            help  ='assign will auto ssh login remote hostname or IP address and you want sudo to user')
 
     args = parser.parse_args()
     #args.func(args)
