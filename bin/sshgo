@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
 import signal,argparse,os,getpass
@@ -24,7 +24,7 @@ def main():
 
     prg = os.path.basename(__file__)
     if prg == 'sshgo':
-        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < HostName [sudouser] >'
+        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < [ HostName [sudouser] ] | [ mkconfig ] >'
     elif prg == 'scpgo':
         Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < HostName:/path/srcfile HostName:/path/distfile >'
 
@@ -71,10 +71,15 @@ def main():
 
     ostype = platform.system()
 
-    if ostype == 'Linux' or ostype == 'Darwin' or ostype == 'SunOS':
+    if ostype == 'Linux' or ostype == 'SunOS':
         configfile = '/home/%s/.go.yml' % args.sshUser
+	sshbin='/usr/bin/ssh'
+    elif ostype == 'Darwin' :
+	sshbin='/usr/bin/ssh'
+        configfile = '/Users/%s/.go.yml' % args.sshUser
     elif ostype == 'Windows':
         configfile = 'C:\go.yml' % args.sshUser
+	sshbin = 'C:\program files\cygwin\usr\bin\ssh'
 
     exitCode=0
 
@@ -103,7 +108,7 @@ def main():
         
 
     try:
-        ssh = AutoSSH(remoteHost,args.sshUser,configfile,args.sshPort,sudoUser,args.jumphost,args.jumphostsshport)
+        ssh = AutoSSH(remoteHost,args.sshUser,configfile,args.sshPort,sudoUser,args.jumphost,args.jumphostsshport,sshbin)
         signal.signal(signal.SIGWINCH,ssh._resizeWin)
         ssh.sshInteract()
 
@@ -112,9 +117,7 @@ def main():
         print(e)
 
 
-"""
------------------------------------------------------
-"""
+""" ----------------------------------------------------- """
 
 
 if __name__ == '__main__' :

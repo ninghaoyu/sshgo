@@ -122,11 +122,11 @@ class Message():
 #*************************************************************************#
 class AutoSSH():
 
-    def __init__(self,hostname,sshuser,configfile,sshport,suUser=None,jumphost=None,jumphostsshport=22):
+    def __init__(self,hostname,sshuser,configfile,sshport,suUser=None,jumphost=None,jumphostsshport=22,sshbin='/usr/bin/ssh'):
 
         self.__hostname= hostname
         self.__sshjumphost = jumphost
-        self.__sshbin = '/usr/bin/ssh'
+        self.__sshbin = sshbin
         self.__sshport=sshport
         self.__nosshport = re.compile(str.encode('.*port %s: Connection refused.*' % self.__sshport))
         self.__sshtimeout = re.compile(str.encode('.*port %s: Connection timed out.*' % self.__sshport))
@@ -146,9 +146,7 @@ class AutoSSH():
 
         self._msg = Message()
 
-        '''
-        check ssh jump host reslove and target ssh host reslove
-        '''
+        ''' check ssh jump host reslove and target ssh host reslove '''
         if self.__useJumpHost :
             if self.hostname_resolves(self.__sshjumphost) == False:
                 raise Exception(self._msg.Warning('The ssh jump hostname "%s" is not resolve!!!' % self.__sshjumphost))
@@ -157,9 +155,7 @@ class AutoSSH():
             raise Exception(self._msg.Warning('The hostname "%s" is not resolve!!!' % self.__hostname))
 
 
-        '''
-        parse config file get user password
-        '''
+        ''' parse config file get user password '''
         self.__sshpassword = parseConfig(configfile).getUserPasswd(sshuser)
         #print("----->",self.__sshpassword)
         if self.__sshpassword == None:
@@ -208,8 +204,7 @@ class AutoSSH():
 
             self._sshobj = pexpect.spawn(self.__SSH)
             self.__setWinSize()
-            ''' when use ssh jump host to connect remote target host, login in jump host first
-            '''
+            ''' when use ssh jump host to connect remote target host, login in jump host first '''
             if self.__useJumpHost:
                 spawnJumpHost = self._sshobj.expect([self.__sshtimeout,self.__nosshport,self.__passwdprompt])
                 if spawnJumpHost == 0:
@@ -219,8 +214,7 @@ class AutoSSH():
                 elif spawnJumpHost == 2:
                     self._sshobj.sendline(self.__sshpassword)
 
-            ''' ssh remote target host, login now
-            '''
+            ''' ssh remote target host, login now '''
             sshspawnstatus = self._sshobj.expect([self.__sshtimeout,self.__nosshport,self.__passwdprompt])
             if sshspawnstatus == 0:
                 raise Exception(self._msg.Failed("ssh port %s time out!" % self.__sshport))
@@ -232,8 +226,9 @@ class AutoSSH():
             #print(self._sshobj.before.decode("utf-8"))
             print(self._sshobj.before.decode()+self._sshobj.after.decode())
 
-            ''' when logined target host,if use sudo user to do soming
-            '''
+
+            ''' when logined target host,if use sudo user to do soming '''
+
             login =  self._sshobj.expect([self.__userprompt,self.__passwdprompt,self.__sudoprompt,pexpect.EOF,pexpect.TIMEOUT])
             if login == 0: #not use sudo user
                 pass
