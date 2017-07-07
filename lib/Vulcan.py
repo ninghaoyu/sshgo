@@ -28,11 +28,12 @@ class parseConfig():
         return  self.__show(self._userInfo[user])
 
     def overWriteConfig(self):
-            outfile=open(self.__configfile, 'wb+') 
+            outfile=open(self.__configfile, 'w+') 
             try:
                 #yaml.dump(self._userInfo, outfile, default_flow_style=False,allow_unicode = True, encoding = 'utf-8')
                 yaml.dump(self._userInfo, outfile, default_flow_style=False)
-            except Exception:
+            except Exception as e:
+                print(e)
                 print("file write error")
                 outfile.close()
                 return False
