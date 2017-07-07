@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 
 import signal,argparse,os,getpass
@@ -13,7 +13,7 @@ except ImportError:
 def mkUsersCfg(user,configfile):
     config=parseConfig(configfile)
     password = getpass.getpass('Type your ssh password:')
-    config._userInfo[user] = config.encrypt(password).encode('utf-8')
+    config._userInfo[user] = str(config.encrypt(password))
     #print(config._userInfo[user])
     #os._exit(0)
     return config.overWriteConfig()
@@ -73,13 +73,13 @@ def main():
 
     if ostype == 'Linux' or ostype == 'SunOS':
         configfile = '/home/%s/.go.yml' % args.sshUser
-	sshbin='/usr/bin/ssh'
+        sshbin='/usr/bin/ssh'
     elif ostype == 'Darwin' :
-	sshbin='/usr/bin/ssh'
+        sshbin='/usr/bin/ssh'
         configfile = '/Users/%s/.go.yml' % args.sshUser
     elif ostype == 'Windows':
         configfile = 'C:\go.yml' % args.sshUser
-	sshbin = 'C:\program files\cygwin\usr\bin\ssh'
+        sshbin = r'C:\program files\cygwin\usr\bin\ssh'
 
     exitCode=0
 
