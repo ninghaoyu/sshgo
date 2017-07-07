@@ -160,13 +160,13 @@ clean:
 	@echo "Cleaning up editor backup files"
 	find . -type f -not -path ./test/units/inventory_test_data/group_vars/noparse/all.yml~ \( -name "*~" -or -name "#*" \) -delete
 	find . -type f \( -name "*.swp" \) -delete
-	@echo "Cleaning up manpage stuff"
-	find ./docs/man -type f -name "*.xml" -delete
-	find ./docs/man -type f -name "*.asciidoc" -delete
-	find ./docs/man/man3 -type f -name "*.3" -delete
-	rm -f ./docs/man/man1/*
+	#@echo "Cleaning up manpage stuff"
+	#find ./docs/man -type f -name "*.xml" -delete
+	#find ./docs/man -type f -name "*.asciidoc" -delete
+	#find ./docs/man/man3 -type f -name "*.3" -delete
+	#rm -f ./docs/man/man1/*
 	@echo "Cleaning up output from test runs"
-	rm -rf test/test_data
+	#rm -rf test/test_data
 	@echo "Cleaning up RPM building stuff"
 	rm -rf MANIFEST rpm-build
 	@echo "Cleaning up Debian building stuff"
@@ -177,8 +177,8 @@ clean:
 	@echo "Cleaning up authors file"
 	rm -f AUTHORS.TXT
 	@echo "Cleaning up tests"
-	rm -f test/units/.coverage*
-	rm -f test/results/*/*
+	#rm -f test/units/.coverage*
+	#rm -f test/results/*/*
 	#@echo "Cleaning up docsite"
 	#$(MAKE) -C docs/docsite clean
 	#$(MAKE) -C docs/api clean
