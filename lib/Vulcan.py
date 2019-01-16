@@ -123,10 +123,14 @@ class Message():
 #*************************************************************************#
 class AutoSSH():
 
-    def __init__(self,hostname,sshuser,configfile,sshport,suUser=None,jumphost=None,jumphostsshport=22,sshbin='/usr/bin/ssh'):
+    def __init__(self,hostname,sshuser,configfile,sshport,suUser=None,jumphost=None,jumphostsshport=22,identity_file=None,sshbin='/usr/bin/ssh'):
 
+        self.__sshoptions = ''
         self.__hostname= hostname
         self.__sshjumphost = jumphost
+        self.__identity_file = identity_file
+        if identity_file != None:
+            self.__sshoptions += ' -i ' + identity_file
         self.__sshbin = sshbin
         self.__sshport=sshport
         self.__nosshport = re.compile(str.encode('.*port %s: Connection refused.*' % self.__sshport))
@@ -135,10 +139,10 @@ class AutoSSH():
         self.__userprompt = re.compile(str.encode('.*[\$>%#] $'))
         self.__passwdprompt = re.compile(str.encode('assword: *$'))
         if self.__sshjumphost == None:
-            self.__sshoptions = ' -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
+            self.__sshoptions += ' -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
             self.__useJumpHost = False
         else:
-            self.__sshoptions = ' -o ProxyCommand="' \
+            self.__sshoptions += ' -o ProxyCommand="' \
                 + self.__sshbin + ' -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p ' \
                 + self.__sshjumphost \
                 + ' -p %s " -o VerifyHostKeyDNS=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ' % jumphostsshport

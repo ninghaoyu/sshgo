@@ -24,9 +24,9 @@ def main():
 
     prg = os.path.basename(__file__)
     if prg == 'sshgo':
-        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < [ HostName [sudouser] ] | [ mkconfig ] >'
+        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-i Public key file ] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < [ HostName [sudouser] ] | [ mkconfig ] >'
     elif prg == 'scpgo':
-        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < HostName:/path/srcfile HostName:/path/distfile >'
+        Usage = 'sshgo [-h] [-u SSHUSER] [-p SSHPORT] [-i Public key file ] [-J JUMPHOST] [-P JUMPHOSTSSHPORT] < HostName:/path/srcfile HostName:/path/distfile >'
 
     msg = Message()
     signal.signal(signal.SIGINT,lambda sig,data: os._exit(1))
@@ -59,6 +59,13 @@ def main():
             required=False,
             default =22,
             help   ='ssh jumphost port default 22 ' )
+    parser.add_argument('-i','--identity_file',
+            action ="store",
+            dest   ="identity_file",
+            required=False,
+            #default ='~/./ssh/id_rsa',
+            default = None,
+            help   ='ssh Private key file path default None' )
     parser.add_argument('loginInfo',
             action="store",
             nargs='*',
@@ -108,7 +115,7 @@ def main():
         
 
     try:
-        ssh = AutoSSH(remoteHost,args.sshUser,configfile,args.sshPort,sudoUser,args.jumphost,args.jumphostsshport,sshbin)
+        ssh = AutoSSH(remoteHost,args.sshUser,configfile,args.sshPort, sudoUser, args.jumphost, args.jumphostsshport, args.identity_file, sshbin)
         signal.signal(signal.SIGWINCH,ssh._resizeWin)
         ssh.sshInteract()
 
